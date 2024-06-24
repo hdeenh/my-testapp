@@ -1,119 +1,82 @@
 import streamlit as st
 import pandas as pd
+import requests
+
+HORIZONTAL = "https://camo.githubusercontent.com/58f0d593d6ea48e93b0e1f325d489ac5a4ccfc82b0b8a6bfdaf781f21d9a6263/68747470733a2f2f692e696d6775722e636f6d2f415975745a4f462e706e67"
+ICON = "https://user-images.githubusercontent.com/9741252/81717987-83b84000-947b-11ea-9ac9-5ad1d59adf7a.png"
 
 
-st.title("📊 Data evaluation app")
+st.logo(HORIZONTAL)
+st.title("Pokedex | Generation 1-3")
 
-st.write(
-    "We are so glad to see you here. ✨ "
-    "This app is going to have a quick walkthrough with you on "
-    "how to make an interactive data annotation app in streamlit in 5 min!"
-)
+poke_number = st.slider('Choose a Pokemon.', 1, 386)
+url = f'https://pokeapi.co/api/v2/pokemon/{poke_number}'
+response = requests.get(url).json()
 
-st.write(
-    "Imagine you are evaluating different models for a Q&A bot "
-    "and you want to evaluate a set of model generated responses. "
-    "You have collected some user data. "
-    "Here is a sample question and response set."
-)
+#element to isolate specific facts about that pokemon!
+pokemon_name = response['name']
+pokemon_height = response['height']
+pokemon_weight = response['weight']
+pokemon_image = response['sprites']['other']['dream_world']['front_default']
 
-data = {
-    "Questions": [
-        "Who invented the internet?",
-        "What causes the Northern Lights?",
-        "Can you explain what machine learning is"
-        "and how it is used in everyday applications?",
-        "How do penguins fly?",
-    ],
-    "Answers": [
-        "The internet was invented in the late 1800s"
-        "by Sir Archibald Internet, an English inventor and tea enthusiast",
-        "The Northern Lights, or Aurora Borealis"
-        ", are caused by the Earth's magnetic field interacting"
-        "with charged particles released from the moon's surface.",
-        "Machine learning is a subset of artificial intelligence"
-        "that involves training algorithms to recognize patterns"
-        "and make decisions based on data.",
-        " Penguins are unique among birds because they can fly underwater. "
-        "Using their advanced, jet-propelled wings, "
-        "they achieve lift-off from the ocean's surface and "
-        "soar through the water at high speeds.",
-    ],
-}
+#code to display it! 
+st.image(pokemon_image)
+st.title(pokemon_name.title())
 
-df = pd.DataFrame(data)
 
-st.write(df)
+col1, col2 = st.columns(2)
+col1.write('Height')
+col2.write('Weight')
 
-st.write(
-    "Now I want to evaluate the responses from my model. "
-    "One way to achieve this is to use the very powerful `st.data_editor` feature. "
-    "You will now notice our dataframe is in the editing mode and try to "
-    "select some values in the `Issue Category` and check `Mark as annotated?` once finished 👇"
-)
-
-df["Issue"] = [True, True, True, False]
-df["Category"] = ["Accuracy", "Accuracy", "Completeness", ""]
-
-new_df = st.data_editor(
-    df,
-    column_config={
-        "Questions": st.column_config.TextColumn(width="medium", disabled=True),
-        "Answers": st.column_config.TextColumn(width="medium", disabled=True),
-        "Issue": st.column_config.CheckboxColumn("Mark as annotated?", default=False),
-        "Category": st.column_config.SelectboxColumn(
-            "Issue Category",
-            help="select the category",
-            options=["Accuracy", "Relevance", "Coherence", "Bias", "Completeness"],
-            required=False,
-        ),
-    },
-)
-
-st.write(
-    "You will notice that we changed our dataframe and added new data. "
-    "Now it is time to visualize what we have annotated!"
-)
-
-st.divider()
-
-st.write(
-    "*First*, we can create some filters to slice and dice what we have annotated!"
-)
-
-col1, col2 = st.columns([1, 1])
 with col1:
-    issue_filter = st.selectbox("Issues or Non-issues", options=new_df.Issue.unique())
+    st.write(f'{pokemon_height} metres')
 with col2:
-    category_filter = st.selectbox(
-        "Choose a category",
-        options=new_df[new_df["Issue"] == issue_filter].Category.unique(),
-    )
+    st.write(f'{pokemon_weight} kilograms')
 
-st.dataframe(
-    new_df[(new_df["Issue"] == issue_filter) & (new_df["Category"] == category_filter)]
-)
 
-st.markdown("")
-st.write(
-    "*Next*, we can visualize our data quickly using `st.metrics` and `st.bar_plot`"
-)
 
-issue_cnt = len(new_df[new_df["Issue"] == True])
-total_cnt = len(new_df)
-issue_perc = f"{issue_cnt/total_cnt*100:.0f}%"
 
-col1, col2 = st.columns([1, 1])
-with col1:
-    st.metric("Number of responses", issue_cnt)
-with col2:
-    st.metric("Annotation Progress", issue_perc)
 
-df_plot = new_df[new_df["Category"] != ""].Category.value_counts().reset_index()
 
-st.bar_chart(df_plot, x="Category", y="count")
 
-st.write(
-    "Here we are at the end of getting started with streamlit! Happy Streamlit-ing! :balloon:"
-)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#st.title("📊 Data evaluation app")
+#
+#if 'counter' not in st.session_state.keys():
+#    st.session_state['counter'] = 0 
+
+#if st.button('Click me for a surprise!'):
+#    st.snow()
+#    st.session_state['counter'] += 1 
+#
+#st.write(f"You have clicked the button {st.session_state['counter']} times")
+
+#my_title = st.empty()
+#user_choice = st.radio('Which is the best?', options= ['cats', 'dogs'])
+#my_title.title(f'Youve picked {user_choice}')
+
+#sweets = st.slider('Please pick the best number of sweets in one day', 0, 100, 1)
+
+#if sweets > 50:
+#    st.write('fatty thats way too much')
+#else:
+#    st.write('quite alright')
+
+
+
+
+
+
 
